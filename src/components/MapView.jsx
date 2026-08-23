@@ -1,19 +1,20 @@
+// src/components/MapView.jsx
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Polyline, Marker, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
 const userIcon = L.divIcon({
   className: 'relative',
-  html: `<div class="w-4 h-4 bg-cyan-400 rounded-full border-2 border-white shadow-[0_0_16px_#22d3ee] animate-pulse"></div>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
+  html: `<div class="w-5 h-5 bg-cyan-400 rounded-full border-2 border-white shadow-[0_0_18px_#22d3ee] animate-pulse flex items-center justify-center"><div class="w-1.5 h-1.5 bg-white rounded-full"></div></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
 });
 
-function MapRecenter({ center }) {
+function MapFollowUser({ center }) {
   const map = useMap();
   useEffect(() => {
     if (center) {
-      map.setView(center, map.getZoom());
+      map.panTo(center, { animate: true, duration: 0.8 });
     }
   }, [center, map]);
   return null;
@@ -23,7 +24,7 @@ export default function MapView({ userLocation, visibleSegments, currentSegmentT
   const center = userLocation || [54.167844, 37.574754];
 
   return (
-    <div className="w-full h-full rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl relative">
+    <div className="w-full h-full absolute inset-0 z-0">
       <MapContainer
         center={center}
         zoom={17}
@@ -31,12 +32,12 @@ export default function MapView({ userLocation, visibleSegments, currentSegmentT
         zoomControl={false}
         attributionControl={false}
       >
-        <MapRecenter center={center} />
+        <MapFollowUser center={center} />
 
-        {/* Тёмная тема карты CartoDB Dark */}
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+        {/* Темная тема CartoDB */}
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png" />
 
-        {/* Отрисовка только открытых 100м участков */}
+        {/* Пройденные и текущий 50м отрезок */}
         {visibleSegments.map((segment, idx) => {
           const isCurrent = idx === visibleSegments.length - 1;
           return (
@@ -45,18 +46,18 @@ export default function MapView({ userLocation, visibleSegments, currentSegmentT
               positions={segment.points}
               pathOptions={{
                 color: isCurrent ? '#10b981' : '#047857',
-                weight: isCurrent ? 6 : 4,
-                dashArray: isCurrent ? '6, 8' : undefined,
-                opacity: isCurrent ? 1 : 0.45,
+                weight: isCurrent ? 7 : 4,
+                dashArray: isCurrent ? '8, 8' : undefined,
+                opacity: isCurrent ? 1 : 0.4,
               }}
             />
           );
         })}
 
-        {/* Текущее положение Насти */}
+        {/* Пользователь */}
         {userLocation && <Marker position={userLocation} icon={userIcon} />}
 
-        {/* Точка текущего рубежа (+100м) */}
+        {/* Чекпоинт текущего 50м рубежа */}
         {currentSegmentTarget && (
           <Circle
             center={currentSegmentTarget}
