@@ -1,4 +1,5 @@
-const EARTH_RADIUS_METERS = 6371000;
+// src/utils/geo.js
+const EARTH_RADIUS = 6371000;
 
 export const toRad = (deg) => (deg * Math.PI) / 180;
 export const toDeg = (rad) => (rad * 180) / Math.PI;
@@ -10,8 +11,7 @@ export function getDistance(lat1, lon1, lat2, lon2) {
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return Math.round(EARTH_RADIUS_METERS * c);
+  return Math.round(EARTH_RADIUS * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
 export function getBearing(lat1, lon1, lat2, lon2) {
@@ -27,8 +27,8 @@ export function getBearing(lat1, lon1, lat2, lon2) {
   return (toDeg(Math.atan2(y, x)) + 360) % 360;
 }
 
-// Нарезка трека на непрерывные отрезки длиной до 100м
-export function sliceRouteIntoSegments(coords, stepMeters = 100) {
+// Шаг по умолчанию изменен на 50 метров
+export function sliceRouteIntoSegments(coords, stepMeters = 50) {
   if (!coords || coords.length < 2) return [];
 
   const segments = [];
@@ -62,5 +62,4 @@ export function sliceRouteIntoSegments(coords, stepMeters = 100) {
   }
 
   return segments;
-}
-  
+  }
