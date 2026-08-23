@@ -27,7 +27,22 @@ export function getBearing(lat1, lon1, lat2, lon2) {
   return (toDeg(Math.atan2(y, x)) + 360) % 360;
 }
 
-// Шаг по умолчанию изменен на 50 метров
+// Поиск минимального расстояния до полилинии (маршрута) в метрах
+export function getMinDistanceToRoute(userCoord, routePoints) {
+  if (!userCoord || !routePoints || routePoints.length === 0) return 0;
+  let minDistance = Infinity;
+
+  for (let i = 0; i < routePoints.length; i++) {
+    const pt = routePoints[i];
+    const dist = getDistance(userCoord[0], userCoord[1], pt[0], pt[1]);
+    if (dist < minDistance) {
+      minDistance = dist;
+    }
+  }
+  return minDistance;
+}
+
+// Нарезка трека на 50-метровые участки
 export function sliceRouteIntoSegments(coords, stepMeters = 50) {
   if (!coords || coords.length < 2) return [];
 
@@ -62,4 +77,4 @@ export function sliceRouteIntoSegments(coords, stepMeters = 50) {
   }
 
   return segments;
-  }
+}
