@@ -1,14 +1,23 @@
-import React from 'react';
-import { MapContainer, TileLayer, Polyline, Marker, Circle } from 'react-leaflet';
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Polyline, Marker, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
-// Иконка текущего положения
 const userIcon = L.divIcon({
   className: 'relative',
-  html: `<div class="w-4 h-4 bg-cyan-400 rounded-full border-2 border-white shadow-[0_0_15px_#22d3ee] animate-pulse"></div>`,
+  html: `<div class="w-4 h-4 bg-cyan-400 rounded-full border-2 border-white shadow-[0_0_16px_#22d3ee] animate-pulse"></div>`,
   iconSize: [16, 16],
   iconAnchor: [8, 8],
 });
+
+function MapRecenter({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map]);
+  return null;
+}
 
 export default function MapView({ userLocation, visibleSegments, currentSegmentTarget }) {
   const center = userLocation || [54.167844, 37.574754];
@@ -22,10 +31,12 @@ export default function MapView({ userLocation, visibleSegments, currentSegmentT
         zoomControl={false}
         attributionControl={false}
       >
-        {/* Темная тема карты (CartoDB Dark Matter) */}
+        <MapRecenter center={center} />
+
+        {/* Тёмная тема карты CartoDB Dark */}
         <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
 
-        {/* Отрисовка только открытых 100м отрезков */}
+        {/* Отрисовка только открытых 100м участков */}
         {visibleSegments.map((segment, idx) => {
           const isCurrent = idx === visibleSegments.length - 1;
           return (
@@ -33,27 +44,33 @@ export default function MapView({ userLocation, visibleSegments, currentSegmentT
               key={idx}
               positions={segment.points}
               pathOptions={{
-                color: isCurrent ? '#10b981' : '#059669',
+                color: isCurrent ? '#10b981' : '#047857',
                 weight: isCurrent ? 6 : 4,
-                dashArray: isCurrent ? '8, 8' : undefined,
-                opacity: isCurrent ? 0.9 : 0.4,
+                dashArray: isCurrent ? '6, 8' : undefined,
+                opacity: isCurrent ? 1 : 0.45,
               }}
             />
           );
         })}
 
-        {/* Маркер пользователя */}
+        {/* Текущее положение Насти */}
         {userLocation && <Marker position={userLocation} icon={userIcon} />}
 
-        {/* Промежуточный чекпоинт (конец текущего 100м отрезка) */}
+        {/* Точка текущего рубежа (+100м) */}
         {currentSegmentTarget && (
           <Circle
             center={currentSegmentTarget}
             radius={15}
-            pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.2 }}
+            pathOptions={{
+              color: '#10b981',
+              fillColor: '#10b981',
+              fillOpacity: 0.25,
+              weight: 2,
+              dashArray: '4, 4',
+            }}
           />
         )}
       </MapContainer>
     </div>
   );
-        }
+}
