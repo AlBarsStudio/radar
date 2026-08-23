@@ -1,17 +1,26 @@
+// src/components/RadarScreen.jsx
 import React from 'react';
-import { Target } from 'lucide-react';
+import { Target, Compass } from 'lucide-react';
 
 export default function RadarScreen({ arrowAngle, distanceToNext, totalDistance, accuracy }) {
-  const getProximityColor = () => {
-    if (distanceToNext <= 15) return 'text-emerald-400 border-emerald-400/80 shadow-[0_0_20px_#10b981]';
-    if (distanceToNext < 40) return 'text-amber-400 border-amber-400/60 shadow-[0_0_15px_#f59e0b]';
-    return 'text-cyan-400 border-cyan-500/40 shadow-[0_0_15px_#06b6d4]';
+  const getProximityStatus = () => {
+    if (distanceToNext <= 15) return { color: 'border-emerald-400 shadow-[0_0_25px_#10b981]', text: 'text-emerald-400', label: 'ТОЧКА ВПЕРЕДИ!' };
+    if (distanceToNext < 40) return { color: 'border-amber-400 shadow-[0_0_20px_#f59e0b]', text: 'text-amber-400', label: 'ПРИБЛИЖЕНИЕ' };
+    return { color: 'border-cyan-500/50 shadow-[0_0_15px_#06b6d4]', text: 'text-cyan-400', label: 'ПОИСК СИГНАЛА' };
   };
 
+  const status = getProximityStatus();
+
   return (
-    <div className="relative flex flex-col items-center justify-center w-full aspect-square max-w-[320px] mx-auto">
-      {/* Внешний радарный круг */}
-      <div className={`relative w-full h-full rounded-full border-2 ${getProximityColor()} bg-zinc-900/70 flex items-center justify-center overflow-hidden transition-colors duration-500`}>
+    <div className="flex flex-col items-center justify-center w-full my-auto select-none">
+      <div className="text-center mb-3">
+        <span className={`text-xs font-bold tracking-widest uppercase ${status.text}`}>
+          {status.label}
+        </span>
+      </div>
+
+      {/* Адаптивный круг радара */}
+      <div className={`relative w-[min(68vw,260px)] aspect-square rounded-full border-2 ${status.color} bg-zinc-900/80 flex items-center justify-center overflow-hidden transition-all duration-500`}>
         {/* Концентрические кольца */}
         <div className="absolute w-3/4 h-3/4 rounded-full border border-dashed border-emerald-500/20" />
         <div className="absolute w-1/2 h-1/2 rounded-full border border-emerald-500/30" />
@@ -23,32 +32,33 @@ export default function RadarScreen({ arrowAngle, distanceToNext, totalDistance,
           <div className="absolute h-full w-[1px] bg-emerald-500/20" />
         </div>
 
-        {/* Вращающийся сканирующий луч */}
-        <div className="absolute inset-0 rounded-full animate-[spin_3.5s_linear_infinite] origin-center pointer-events-none bg-[conic-gradient(from_0deg,transparent_0deg,transparent_270deg,rgba(16,185,129,0.25)_360deg)]" />
+        {/* Сканирующий луч */}
+        <div className="absolute inset-0 rounded-full animate-[spin_3s_linear_infinite] origin-center pointer-events-none bg-[conic-gradient(from_0deg,transparent_0deg,transparent_270deg,rgba(16,185,129,0.3)_360deg)]" />
 
-        {/* Стрелка пеленга на следующую точку (+100м) */}
+        {/* Стрелка пеленга к следующей точке (+50м) */}
         <div
           className="absolute inset-0 flex items-center justify-center transition-transform duration-300 ease-out"
           style={{ transform: `rotate(${arrowAngle}deg)` }}
         >
-          <div className="flex flex-col items-center -translate-y-28">
-            <div className="w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[28px] border-b-emerald-400 drop-shadow-[0_0_12px_#10b981]" />
-            <div className="w-1.5 h-6 bg-emerald-400/80 rounded-full" />
+          <div className="flex flex-col items-center -translate-y-20 sm:-translate-y-24">
+            <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[24px] border-b-emerald-400 drop-shadow-[0_0_10px_#10b981]" />
+            <div className="w-1 h-5 bg-emerald-400/70 rounded-full" />
           </div>
         </div>
 
-        {/* Центральная точка игрока */}
-        <div className="relative z-10 flex items-center justify-center">
-          <div className="w-4 h-4 bg-emerald-400 rounded-full shadow-[0_0_15px_#34d399] animate-ping opacity-75 absolute" />
-          <div className="w-3.5 h-3.5 bg-emerald-300 rounded-full z-10 border-2 border-zinc-950" />
-        </div>
+        {/* Центр игрока */}
+        <div className="w-3 h-3 bg-emerald-400 rounded-full z-10 shadow-[0_0_10px_#34d399]" />
       </div>
 
-      {/* Метка дистанции по центру внизу */}
-      <div className="absolute -bottom-4 bg-zinc-900/90 border border-zinc-700 px-4 py-1 rounded-full text-xs text-zinc-300 flex items-center gap-1 shadow-lg">
-        <Target size={12} className="text-emerald-400" />
-        <span>До рубежа: <b className="text-emerald-400">{distanceToNext} м</b></span>
+      {/* Показатели под радаром */}
+      <div className="mt-4 text-center">
+        <div className="text-3xl font-black text-emerald-400 tracking-tight">
+          {distanceToNext} <span className="text-xs text-zinc-500 font-normal">МЕТРОВ</span>
+        </div>
+        <div className="text-[10px] text-zinc-500 mt-1">
+          До финиша: <b className="text-zinc-300">{totalDistance} м</b> {accuracy ? `(GPS ±${accuracy}м)` : ''}
+        </div>
       </div>
     </div>
   );
-}
+        }
